@@ -1,0 +1,534 @@
+  :root {
+    --paper: #0f0e13;
+    --paper-deep: #18171f;
+    --paper-elev: #1f1d27;
+    --ink: #d8d2c0;
+    --ink-soft: #9a9384;
+    --ink-faded: #5e5a52;
+    --rule: #2b2832;
+    --mauve: #a99cc8;
+    --mauve-soft: #6e6685;
+    --shadow: rgba(0, 0, 0, 0.55);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Cormorant Garamond', 'EB Garamond', Georgia, serif;
+    font-size: 20px;
+    line-height: 1.65;
+    min-height: 100vh;
+    /* Faint film grain — barely perceptible noise on the dark background */
+    background-image:
+      radial-gradient(rgba(255, 255, 255, 0.012) 1px, transparent 1px),
+      radial-gradient(rgba(255, 255, 255, 0.008) 1px, transparent 1px);
+    background-size: 3px 3px, 7px 7px;
+    background-position: 0 0, 1px 2px;
+  }
+
+  /* Reduced motion respect */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+  .stage {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 80px 32px 160px;
+    position: relative;
+  }
+
+  .room-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 400;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--ink-faded);
+    margin-bottom: 28px;
+    display: inline-block;
+    padding: 4px 0;
+    border-bottom: 1px solid var(--rule);
+    opacity: 0;
+    animation: fadeIn 600ms ease forwards;
+  }
+
+  .room-label .act {
+    color: var(--mauve);
+    margin-right: 12px;
+  }
+
+  .prose p {
+    margin-bottom: 1.25em;
+    opacity: 0;
+    transform: translateY(4px);
+    animation: fadeIn 900ms ease forwards;
+  }
+
+  .prose p:nth-child(1) { animation-delay: 200ms; }
+  .prose p:nth-child(2) { animation-delay: 700ms; }
+  .prose p:nth-child(3) { animation-delay: 1200ms; }
+  .prose p:nth-child(4) { animation-delay: 1700ms; }
+  .prose p:nth-child(5) { animation-delay: 2200ms; }
+  .prose p:nth-child(6) { animation-delay: 2700ms; }
+  .prose p:nth-child(7) { animation-delay: 3200ms; }
+
+  .prose em {
+    font-style: italic;
+    color: var(--ink-soft);
+  }
+
+  /* Words the protagonist would not naturally use */
+  .prose .drift {
+    color: var(--mauve);
+    font-style: italic;
+  }
+
+  .choices {
+    margin-top: 48px;
+    padding-top: 28px;
+    border-top: 1px solid var(--rule);
+    opacity: 0;
+    animation: fadeIn 1200ms ease forwards;
+    animation-delay: 2800ms;
+  }
+
+  .choice {
+    display: block;
+    width: 100%;
+    background: none;
+    border: none;
+    text-align: left;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    color: var(--ink);
+    padding: 14px 0 14px 24px;
+    cursor: pointer;
+    position: relative;
+    line-height: 1.6;
+    transition: color 200ms ease, padding-left 200ms ease;
+    border-bottom: 1px dotted transparent;
+  }
+
+  .choice:hover, .choice:focus-visible {
+    color: var(--mauve);
+    padding-left: 32px;
+    outline: none;
+  }
+
+  .choice:focus-visible {
+    border-bottom-color: var(--mauve);
+  }
+
+  .choice::before {
+    content: '›';
+    position: absolute;
+    left: 0;
+    color: var(--ink-faded);
+    transition: color 200ms ease;
+  }
+
+  .choice:hover::before, .choice:focus-visible::before {
+    color: var(--mauve);
+  }
+
+  /* Notebook */
+  .notebook-toggle {
+    position: fixed;
+    top: 24px;
+    right: 24px;
+    background: var(--paper-deep);
+    border: 1px solid var(--rule);
+    color: var(--ink-soft);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 10px 16px;
+    cursor: pointer;
+    transition: all 200ms ease;
+    z-index: 10;
+  }
+
+  .notebook-toggle:hover, .notebook-toggle:focus-visible {
+    color: var(--ink);
+    border-color: var(--ink-soft);
+    outline: none;
+  }
+
+  /* Audio toggle — bottom-right corner, separate from notebook */
+  .audio-toggle {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: var(--paper-deep);
+    border: 1px solid var(--rule);
+    color: var(--ink-soft);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 8px 14px;
+    cursor: pointer;
+    transition: all 200ms ease;
+    z-index: 10;
+  }
+  .audio-toggle:hover, .audio-toggle:focus-visible {
+    color: var(--ink);
+    border-color: var(--ink-soft);
+    outline: none;
+  }
+  .audio-toggle .sym {
+    display: inline-block;
+    margin-right: 6px;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 14px;
+    line-height: 1;
+    transform: translateY(1px);
+  }
+  @media (max-width: 600px) {
+    .audio-toggle { bottom: 16px; right: 16px; padding: 6px 12px; }
+  }
+
+  /* Inventory — top-left, mirrors notebook visually */
+  .inv-toggle {
+    position: fixed;
+    top: 24px;
+    left: 24px;
+    background: var(--paper-deep);
+    border: 1px solid var(--rule);
+    color: var(--ink-soft);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 10px 16px;
+    cursor: pointer;
+    transition: all 200ms ease;
+    z-index: 10;
+  }
+  .inv-toggle:hover, .inv-toggle:focus-visible {
+    color: var(--ink);
+    border-color: var(--ink-soft);
+    outline: none;
+  }
+  .inv-toggle .count {
+    display: inline-block;
+    margin-left: 8px;
+    color: var(--mauve);
+    font-weight: 500;
+  }
+  .inv-toggle.has-new {
+    animation: pulse 2s ease infinite;
+  }
+  .inv-panel {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 380px;
+    max-width: 90vw;
+    background: var(--paper-deep);
+    border-right: 1px solid var(--rule);
+    box-shadow: 8px 0 24px var(--shadow);
+    transform: translateX(-100%);
+    transition: transform 400ms ease;
+    z-index: 20;
+    overflow-y: auto;
+    padding: 32px 28px;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 17px;
+    line-height: 1.55;
+    color: var(--ink-soft);
+  }
+  .inv-panel.open {
+    transform: translateX(0);
+  }
+  .inv-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 28px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--rule);
+  }
+  .inv-header h2 {
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 400;
+    font-style: italic;
+    font-size: 22px;
+    color: var(--ink);
+  }
+  .inv-close {
+    background: none;
+    border: none;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--ink-faded);
+    cursor: pointer;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .inv-item {
+    margin-bottom: 22px;
+    padding-bottom: 18px;
+    border-bottom: 1px dotted var(--rule);
+  }
+  .inv-item:last-child {
+    border-bottom: none;
+  }
+  .inv-item-name {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-faded);
+    display: block;
+    margin-bottom: 6px;
+  }
+  .inv-item-desc {
+    color: var(--ink);
+  }
+  .inv-empty {
+    color: var(--ink-faded);
+    font-style: italic;
+  }
+  @media (max-width: 600px) {
+    .inv-toggle { top: 16px; left: 16px; padding: 8px 12px; }
+  }
+
+  .notebook-toggle .dot {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--mauve);
+    margin-left: 8px;
+    vertical-align: middle;
+    opacity: 0;
+    transition: opacity 300ms ease;
+  }
+
+  .notebook-toggle.has-new .dot {
+    opacity: 1;
+    animation: pulse 2s ease infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 1; }
+  }
+
+  /* New-item / new-note indicator — a slow soft mauve glow that
+     rises gently and fades, no scaling, no flash. The accent on the
+     button (count or dot) stays mauve until viewed. */
+  @keyframes foundFlash {
+    0% {
+      box-shadow: 0 0 0 0 rgba(169, 156, 200, 0);
+      border-color: var(--rule);
+    }
+    15% {
+      box-shadow: 0 0 16px 1px rgba(169, 156, 200, 0.55);
+      border-color: var(--mauve);
+    }
+    100% {
+      box-shadow: 0 0 0 0 rgba(169, 156, 200, 0);
+      border-color: var(--rule);
+    }
+  }
+  .inv-toggle.flash, .notebook-toggle.flash {
+    animation: foundFlash 2400ms ease-out;
+  }
+
+  .notebook-panel {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 380px;
+    max-width: 90vw;
+    background: var(--paper-deep);
+    border-left: 1px solid var(--rule);
+    box-shadow: -8px 0 24px var(--shadow);
+    transform: translateX(100%);
+    transition: transform 400ms ease;
+    z-index: 20;
+    overflow-y: auto;
+    padding: 32px 28px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    line-height: 1.75;
+    color: var(--ink-soft);
+  }
+
+  .notebook-panel.open {
+    transform: translateX(0);
+  }
+
+  .notebook-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 28px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .notebook-header h2 {
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 400;
+    font-style: italic;
+    font-size: 22px;
+    color: var(--ink);
+  }
+
+  .notebook-close {
+    background: none;
+    border: none;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--ink-faded);
+    cursor: pointer;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .notebook-entry {
+    margin-bottom: 22px;
+    padding-bottom: 18px;
+    border-bottom: 1px dotted var(--rule);
+  }
+
+  .notebook-entry:last-child {
+    border-bottom: none;
+  }
+
+  .entry-time {
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-faded);
+    display: block;
+    margin-bottom: 6px;
+  }
+
+  .entry-body {
+    color: var(--ink);
+  }
+
+  /* Entries the player didn't write */
+  .notebook-entry.foreign .entry-body {
+    color: var(--mauve);
+    font-style: italic;
+  }
+
+  .notebook-entry.foreign .entry-time::after {
+    content: ' — not yours';
+    color: var(--mauve-soft);
+  }
+
+  .notebook-empty {
+    color: var(--ink-faded);
+    font-style: italic;
+    font-family: 'Cormorant Garamond', serif;
+  }
+
+  /* Endings */
+  .ending {
+    text-align: center;
+    padding-top: 40px;
+  }
+
+  .ending .room-label {
+    color: var(--mauve);
+  }
+
+  .ending .prose p {
+    font-size: 19px;
+    line-height: 1.85;
+  }
+
+  .ending .restart {
+    margin-top: 60px;
+    background: none;
+    border: 1px solid var(--rule);
+    padding: 12px 28px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    cursor: pointer;
+    transition: all 200ms ease;
+    opacity: 0;
+    animation: fadeIn 1000ms ease forwards;
+    animation-delay: 4000ms;
+  }
+
+  .ending .restart:hover, .ending .restart:focus-visible {
+    color: var(--ink);
+    border-color: var(--ink-soft);
+    outline: none;
+  }
+
+  @keyframes fadeIn {
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Title screen */
+  .title-screen {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 32px;
+    text-align: center;
+  }
+
+  .title-screen h1 {
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 400;
+    font-style: italic;
+    font-size: 72px;
+    line-height: 1;
+    color: var(--ink);
+    margin-bottom: 96px;
+    letter-spacing: 0.02em;
+  }
+
+  .title-screen .begin {
+    background: none;
+    border: 1px solid var(--ink-faded);
+    padding: 16px 44px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    cursor: pointer;
+    transition: all 350ms ease;
+  }
+
+  .title-screen .begin:hover, .title-screen .begin:focus-visible {
+    background: var(--mauve);
+    border-color: var(--mauve);
+    color: var(--paper);
+    outline: none;
+    letter-spacing: 0.36em;
+  }
+
+  @media (max-width: 600px) {
+    .title-screen h1 { font-size: 52px; margin-bottom: 64px; }
+    .stage { padding: 60px 22px 140px; }
+    html, body { font-size: 18px; }
+    .notebook-toggle { top: 16px; right: 16px; padding: 8px 12px; }
+  }

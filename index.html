@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tenancy</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+
+<button class="inv-toggle" id="invToggle" aria-label="Open inventory" style="display:none;">
+  Inventory<span class="count" id="invCount">0</span>
+</button>
+
+<button class="notebook-toggle" id="notebookToggle" aria-label="Open notebook" style="display:none;">
+  Notebook<span class="dot"></span>
+</button>
+
+<button class="audio-toggle" id="audioToggle" aria-label="Toggle audio" style="display:none;">
+  <span class="sym">♪</span>on
+</button>
+
+<aside class="inv-panel" id="invPanel" aria-hidden="true">
+  <div class="inv-header">
+    <h2>What you have</h2>
+    <button class="inv-close" id="invClose">Close</button>
+  </div>
+  <div id="invItems">
+    <p class="inv-empty">Nothing yet.</p>
+  </div>
+</aside>
+
+<aside class="notebook-panel" id="notebookPanel" aria-hidden="true">
+  <div class="notebook-header">
+    <h2>Notes</h2>
+    <button class="notebook-close" id="notebookClose">Close</button>
+  </div>
+  <div id="notebookEntries">
+    <p class="notebook-empty">Nothing yet.</p>
+  </div>
+</aside>
+
+<main id="root"></main>
+
+<!-- Game modules, loaded in dependency order -->
+<script src="js/state.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/items.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/engine.js"></script>
+<script src="js/scenes.js"></script>
+<script src="js/main.js"></script>
+
+</body>
+</html>
