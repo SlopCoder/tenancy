@@ -233,8 +233,20 @@
     color: var(--mauve);
     font-weight: 500;
   }
-  .inv-toggle.has-new {
-    animation: pulse 2s ease infinite;
+  .inv-toggle .dot {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--mauve);
+    margin-left: 8px;
+    vertical-align: middle;
+    opacity: 0;
+    transition: opacity 400ms ease;
+  }
+  .inv-toggle.has-new .dot {
+    opacity: 1;
+    animation: breathe 3.6s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   }
   .inv-panel {
     position: fixed;
@@ -288,9 +300,25 @@
     margin-bottom: 22px;
     padding-bottom: 18px;
     border-bottom: 1px dotted var(--rule);
+    position: relative;
+    animation: itemAppear 600ms cubic-bezier(0.2, 0.8, 0.3, 1);
   }
   .inv-item:last-child {
     border-bottom: none;
+  }
+  .inv-item.is-new::before {
+    content: '';
+    position: absolute;
+    left: -16px;
+    top: 0;
+    bottom: 18px;
+    width: 2px;
+    background: var(--mauve);
+    opacity: 0.7;
+    border-radius: 2px;
+  }
+  .inv-item.is-new .inv-item-name {
+    color: var(--mauve);
   }
   .inv-item-name {
     font-family: 'JetBrains Mono', monospace;
@@ -300,6 +328,7 @@
     color: var(--ink-faded);
     display: block;
     margin-bottom: 6px;
+    transition: color 400ms ease;
   }
   .inv-item-desc {
     color: var(--ink);
@@ -307,6 +336,11 @@
   .inv-empty {
     color: var(--ink-faded);
     font-style: italic;
+  }
+
+  @keyframes itemAppear {
+    0% { opacity: 0; transform: translateY(6px); }
+    100% { opacity: 1; transform: translateY(0); }
   }
   @media (max-width: 600px) {
     .inv-toggle { top: 16px; left: 16px; padding: 8px 12px; }
@@ -326,11 +360,25 @@
 
   .notebook-toggle.has-new .dot {
     opacity: 1;
-    animation: pulse 2s ease infinite;
+    animation: breathe 3.6s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   }
 
+  @keyframes breathe {
+    0%, 100% {
+      opacity: 0.55;
+      transform: scale(1);
+      box-shadow: 0 0 0 0 rgba(169, 156, 200, 0);
+    }
+    50% {
+      opacity: 1;
+      transform: scale(1.12);
+      box-shadow: 0 0 8px 1px rgba(169, 156, 200, 0.45);
+    }
+  }
+
+  /* Legacy pulse — kept only in case any element still references it. */
   @keyframes pulse {
-    0%, 100% { opacity: 0.4; }
+    0%, 100% { opacity: 0.55; }
     50% { opacity: 1; }
   }
 
@@ -412,10 +460,28 @@
     margin-bottom: 22px;
     padding-bottom: 18px;
     border-bottom: 1px dotted var(--rule);
+    position: relative;
+    animation: itemAppear 600ms cubic-bezier(0.2, 0.8, 0.3, 1);
   }
 
   .notebook-entry:last-child {
     border-bottom: none;
+  }
+
+  .notebook-entry.is-new::before {
+    content: '';
+    position: absolute;
+    right: -16px;
+    top: 0;
+    bottom: 18px;
+    width: 2px;
+    background: var(--mauve);
+    opacity: 0.7;
+    border-radius: 2px;
+  }
+
+  .notebook-entry.is-new .entry-time {
+    color: var(--mauve);
   }
 
   .entry-time {
@@ -547,7 +613,7 @@
 <body>
 
 <button class="inv-toggle" id="invToggle" aria-label="Open inventory" style="display:none;">
-  Inventory<span class="count" id="invCount">0</span>
+  Inventory<span class="count" id="invCount">0</span><span class="dot"></span>
 </button>
 
 <button class="notebook-toggle" id="notebookToggle" aria-label="Open notebook" style="display:none;">
@@ -1229,12 +1295,20 @@ function renderNotebook() {
     notebookEntriesEl.innerHTML = '<p class="notebook-empty">Nothing yet.</p>';
     return;
   }
-  notebookEntriesEl.innerHTML = state.notebook.map(e => `
-    <div class="notebook-entry ${e.foreign ? 'foreign' : ''}">
-      <span class="entry-time">${e.time}</span>
-      <div class="entry-body">${e.body}</div>
-    </div>
-  `).join('');
+  notebookEntriesEl.innerHTML = state.notebook.map((e, i) => {
+    const isNew = i >= state.notebookSeen;
+    const cls = [
+      'notebook-entry',
+      e.foreign ? 'foreign' : '',
+      isNew ? 'is-new' : '',
+    ].filter(Boolean).join(' ');
+    return `
+      <div class="${cls}">
+        <span class="entry-time">${e.time}</span>
+        <div class="entry-body">${e.body}</div>
+      </div>
+    `;
+  }).join('');
 }
 
 /* -- Inventory ------------------------------------------- */
@@ -1272,17 +1346,43 @@ function renderInventory() {
     invItemsEl.innerHTML = '<p class="inv-empty">Nothing yet.</p>';
     return;
   }
-  invItemsEl.innerHTML = state.inventory.map(id => {
+  invItemsEl.innerHTML = state.inventory.map((id, i) => {
     const it = items[id];
     if (!it) return '';
+    const isNew = i >= state.invSeen;
     return `
-      <div class="inv-item">
+      <div class="inv-item ${isNew ? 'is-new' : ''}">
         <span class="inv-item-name">${it.name}</span>
         <div class="inv-item-desc">${it.desc}</div>
       </div>
     `;
   }).join('');
 }
+
+/* -- Keyboard + outside-click closing -------------------- */
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    if (notebookPanel.classList.contains('open')) closeNotebook();
+    if (invPanel.classList.contains('open')) closeInventory();
+  }
+});
+
+document.addEventListener('click', (e) => {
+  // The audio toggle is a small corner control — clicking it shouldn't dismiss an open panel.
+  if (audioToggle.contains(e.target)) return;
+  // Notebook: close if click is outside the panel and not on its toggle
+  if (notebookPanel.classList.contains('open') &&
+      !notebookPanel.contains(e.target) &&
+      !notebookToggle.contains(e.target)) {
+    closeNotebook();
+  }
+  if (invPanel.classList.contains('open') &&
+      !invPanel.contains(e.target) &&
+      !invToggle.contains(e.target)) {
+    closeInventory();
+  }
+});
 
 /* ============================================================
    engine.js
@@ -1328,9 +1428,28 @@ function dominantInhabitant() {
   return entries[0][0];
 }
 
+/* -- Progress check (Act II → III, attic_open flag) -----------
+   Runs on every scene transition so the trigger fires no matter
+   where the player is wandering, not only when they happen to
+   visit the upstairs hall. */
+
+function checkProgress() {
+  if (state.act !== 2) return;
+  const total = Object.values(state.visited).reduce((a, b) => a + b, 0);
+  const dom = dominantInhabitant();
+  const domVal = dom ? state.affinity[dom] : 0;
+  // Lowered thresholds so a normal first-time playthrough reliably
+  // hits Act III before getting stuck.
+  if (total >= 10 || domVal >= 4) {
+    state.act = 3;
+    state.flags.attic_open = true;
+  }
+}
+
 /* -- Renderer ------------------------------------------------- */
 
 function render(sceneObj) {
+  checkProgress();
   const text = (typeof sceneObj.text === 'function') ? sceneObj.text(state) : sceneObj.text;
   const choices = (typeof sceneObj.choices === 'function') ? sceneObj.choices(state) : sceneObj.choices;
   const label = (typeof sceneObj.label === 'function') ? sceneObj.label(state) : sceneObj.label;
@@ -1543,6 +1662,7 @@ const scenes = {
       if (dominantInhabitant() !== 'walter') {
         opts.splice(0, 1);
       }
+      opts.push({ label: "Leave the house. Go back to the car.", next: 'ending_fifth' });
       return opts;
     },
   },
@@ -2543,23 +2663,9 @@ scenes.basement.choices = function(s) {
   return base;
 };
 
-/* Once Act II has gone long enough — defined as 8+ Act-II room visits OR
-   a dominant inhabitant with affinity ≥ 5 — the upstairs hall offers the
-   attic. We unlock it via the 'attic_door_locked' scene above by flipping
-   state.flags.attic_open at that threshold. */
-
-const _origUpstairsChoices = scenes.upstairs_hall.choices;
-scenes.upstairs_hall.choices = function(s) {
-  // Compute total Act II visits
-  const total = Object.values(s.visited).reduce((a,b)=>a+b, 0);
-  const dom = dominantInhabitant();
-  const domVal = dom ? s.affinity[dom] : 0;
-  if (s.act === 2 && (total >= 14 || domVal >= 5)) {
-    s.act = 3;
-    s.flags.attic_open = true;
-  }
-  return _origUpstairsChoices(s);
-};
+/* The upstairs override is no longer needed for the Act III trigger
+   — render() handles it globally now. Kept here as a stub in case
+   we want to add upstairs-specific logic later. */
 
 /* ============================================================
    TITLE SCREEN

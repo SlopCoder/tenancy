@@ -71,12 +71,20 @@ function renderNotebook() {
     notebookEntriesEl.innerHTML = '<p class="notebook-empty">Nothing yet.</p>';
     return;
   }
-  notebookEntriesEl.innerHTML = state.notebook.map(e => `
-    <div class="notebook-entry ${e.foreign ? 'foreign' : ''}">
-      <span class="entry-time">${e.time}</span>
-      <div class="entry-body">${e.body}</div>
-    </div>
-  `).join('');
+  notebookEntriesEl.innerHTML = state.notebook.map((e, i) => {
+    const isNew = i >= state.notebookSeen;
+    const cls = [
+      'notebook-entry',
+      e.foreign ? 'foreign' : '',
+      isNew ? 'is-new' : '',
+    ].filter(Boolean).join(' ');
+    return `
+      <div class="${cls}">
+        <span class="entry-time">${e.time}</span>
+        <div class="entry-body">${e.body}</div>
+      </div>
+    `;
+  }).join('');
 }
 
 /* -- Inventory ------------------------------------------- */
@@ -114,14 +122,40 @@ function renderInventory() {
     invItemsEl.innerHTML = '<p class="inv-empty">Nothing yet.</p>';
     return;
   }
-  invItemsEl.innerHTML = state.inventory.map(id => {
+  invItemsEl.innerHTML = state.inventory.map((id, i) => {
     const it = items[id];
     if (!it) return '';
+    const isNew = i >= state.invSeen;
     return `
-      <div class="inv-item">
+      <div class="inv-item ${isNew ? 'is-new' : ''}">
         <span class="inv-item-name">${it.name}</span>
         <div class="inv-item-desc">${it.desc}</div>
       </div>
     `;
   }).join('');
 }
+
+/* -- Keyboard + outside-click closing -------------------- */
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    if (notebookPanel.classList.contains('open')) closeNotebook();
+    if (invPanel.classList.contains('open')) closeInventory();
+  }
+});
+
+document.addEventListener('click', (e) => {
+  // The audio toggle is a small corner control — clicking it shouldn't dismiss an open panel.
+  if (audioToggle.contains(e.target)) return;
+  // Notebook: close if click is outside the panel and not on its toggle
+  if (notebookPanel.classList.contains('open') &&
+      !notebookPanel.contains(e.target) &&
+      !notebookToggle.contains(e.target)) {
+    closeNotebook();
+  }
+  if (invPanel.classList.contains('open') &&
+      !invPanel.contains(e.target) &&
+      !invToggle.contains(e.target)) {
+    closeInventory();
+  }
+});

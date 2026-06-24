@@ -42,9 +42,28 @@ function dominantInhabitant() {
   return entries[0][0];
 }
 
+/* -- Progress check (Act II → III, attic_open flag) -----------
+   Runs on every scene transition so the trigger fires no matter
+   where the player is wandering, not only when they happen to
+   visit the upstairs hall. */
+
+function checkProgress() {
+  if (state.act !== 2) return;
+  const total = Object.values(state.visited).reduce((a, b) => a + b, 0);
+  const dom = dominantInhabitant();
+  const domVal = dom ? state.affinity[dom] : 0;
+  // Lowered thresholds so a normal first-time playthrough reliably
+  // hits Act III before getting stuck.
+  if (total >= 10 || domVal >= 4) {
+    state.act = 3;
+    state.flags.attic_open = true;
+  }
+}
+
 /* -- Renderer ------------------------------------------------- */
 
 function render(sceneObj) {
+  checkProgress();
   const text = (typeof sceneObj.text === 'function') ? sceneObj.text(state) : sceneObj.text;
   const choices = (typeof sceneObj.choices === 'function') ? sceneObj.choices(state) : sceneObj.choices;
   const label = (typeof sceneObj.label === 'function') ? sceneObj.label(state) : sceneObj.label;

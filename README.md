@@ -10,8 +10,6 @@ You inherit a house from someone you barely remember. The key fits. The rooms fe
 
 Open `tenancy.html` in any modern browser (Chrome, Firefox, Safari, Edge). Double-click is fine — no server required, no installation, nothing to set up. The whole game is in that one file.
 
-Send the single file to others by email, by direct link, by hosting on any static site (GitHub Pages, Netlify, itch.io, your own server). They just open it.
-
 ### For developers (project structure)
 
 The development version is split across files. Because browsers block local file:// imports for security, you need a tiny local server. From the project root:

@@ -99,6 +99,7 @@ const scenes = {
       if (dominantInhabitant() !== 'walter') {
         opts.splice(0, 1);
       }
+      opts.push({ label: "Leave the house. Go back to the car.", next: 'ending_fifth' });
       return opts;
     },
   },
@@ -1099,20 +1100,6 @@ scenes.basement.choices = function(s) {
   return base;
 };
 
-/* Once Act II has gone long enough — defined as 8+ Act-II room visits OR
-   a dominant inhabitant with affinity ≥ 5 — the upstairs hall offers the
-   attic. We unlock it via the 'attic_door_locked' scene above by flipping
-   state.flags.attic_open at that threshold. */
-
-const _origUpstairsChoices = scenes.upstairs_hall.choices;
-scenes.upstairs_hall.choices = function(s) {
-  // Compute total Act II visits
-  const total = Object.values(s.visited).reduce((a,b)=>a+b, 0);
-  const dom = dominantInhabitant();
-  const domVal = dom ? s.affinity[dom] : 0;
-  if (s.act === 2 && (total >= 14 || domVal >= 5)) {
-    s.act = 3;
-    s.flags.attic_open = true;
-  }
-  return _origUpstairsChoices(s);
-};
+/* The upstairs override is no longer needed for the Act III trigger
+   — render() handles it globally now. Kept here as a stub in case
+   we want to add upstairs-specific logic later. */
